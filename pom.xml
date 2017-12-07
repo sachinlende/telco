@@ -119,6 +119,19 @@
             <name>Red Hat General Availability Repository</name>
             <url>https://maven.repository.redhat.com/ga</url>
         </repository>
+        <repository>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>my-nexus</id>
+            <name>My Nexus</name>
+            <url>http://nexus3-spring-boot.192.168.99.100.nip.io/repository/my-nexus/</url>
+        </repository>
+
     </repositories>
 
     <pluginRepositories>
