@@ -1,4 +1,4 @@
-package nz.co.spark.data;
+package nz.co.spark.data.access;
 
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +14,7 @@ public class OracleRepositoryImpl implements OracleRepository{
     @PersistenceContext
     private EntityManager entityManager;
 
-    public void invokeSP() {
+    public List<Object[]> invokeSP() {
 
         StoredProcedureQuery storedProcedure = entityManager.createStoredProcedureQuery("GETPERSONPCKG.GETPERSON");
 
@@ -24,11 +24,7 @@ public class OracleRepositoryImpl implements OracleRepository{
         // Call the stored procedure.
         List<Object[]> storedProcedureResults = storedProcedure.getResultList();
 
-        for(Object[] myrecord : storedProcedureResults){
-            String name = (String) myrecord[1];
-
-            System.out.println(name);
-        }
+        return storedProcedureResults;
 
         //Object[]  myrecord = storedProcedureResults.get(0);
 

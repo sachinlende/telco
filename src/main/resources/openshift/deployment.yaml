@@ -1,0 +1,174 @@
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  name: telco
+  namespace: spring-boot
+  labels:
+    component: telco
+    container: springboot_telco
+    group: telco
+    project: spring-boot
+spec:
+  strategy:
+    type: Recreate
+    recreateParams:
+      timeoutSeconds: 420
+    resources: {}
+    activeDeadlineSeconds: 21600
+  triggers:
+    - type: ConfigChange
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+          - navitas-main
+        from:
+          kind: ImageStreamTag
+          namespace: sb-build-test
+          name: 'navitas-main:latest'
+        lastTriggeredImage: >-
+          172.30.177.97:5000/sb-build-test/navitas-main@sha256:8d5de783455dea673c98be4eb7b629ef7f4ea247c31674b258950d0ae0a03725
+  replicas: 1
+  test: false
+  selector:
+    component: navitas-main
+    container: springboot_navitas
+    deploymentconfig: navitas-main
+    group: navitas
+    project: navitas-main
+    provider: s2i
+    version: '1.0'
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        component: navitas-main
+        container: springboot_navitas
+        deploymentconfig: navitas-main
+        group: navitas
+        project: navitas-main
+        provider: s2i
+        version: '1.0'
+    spec:
+      volumes:
+        - name: config-volume-navitas
+          configMap:
+            name: navitas-config
+            defaultMode: 420
+      containers:
+        - name: navitas-main
+          image: >-
+            172.30.177.97:5000/sb-build-test/navitas-main@sha256:8d5de783455dea673c98be4eb7b629ef7f4ea247c31674b258950d0ae0a03725
+          ports:
+            - name: jettyhttp
+              containerPort: 8183
+              protocol: TCP
+            - name: jolokia
+              containerPort: 8778
+              protocol: TCP
+            - name: health
+              containerPort: 9081
+              protocol: TCP
+          env:
+            - name: JAVA_ARGS
+              value: '--spring.config.location=file:/etc/config/application.properties'
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: ENV_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: AWS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: nonprod-develop-secret
+                  key: awsaccesskey
+            - name: AWS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: nonprod-develop-secret
+                  key: awssecretkey
+            - name: STL_USERID
+              valueFrom:
+                secretKeyRef:
+                  name: nonprod-develop-secret
+                  key: stluserid
+            - name: STL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nonprod-develop-secret
+                  key: stlpassword
+            - name: STL_PROVIDER
+              valueFrom:
+                secretKeyRef:
+                  name: nonprod-develop-secret
+                  key: stlprovider
+          resources:
+            limits:
+              cpu: 1200m
+              memory: 3G
+            requests:
+              cpu: 200m
+              memory: 1500M
+          volumeMounts:
+            - name: config-volume-navitas
+              mountPath: /etc/config
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 9081
+              scheme: HTTP
+            initialDelaySeconds: 180
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 9081
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+status:
+  latestVersion: 35
+  observedGeneration: 39
+  replicas: 1
+  updatedReplicas: 1
+  availableReplicas: 1
+  unavailableReplicas: 0
+  details:
+    message: image change
+    causes:
+      - type: ImageChange
+        imageTrigger:
+          from:
+            kind: ImageStreamTag
+            namespace: sb-build-test
+            name: 'navitas-main:latest'
+  conditions:
+    - type: Available
+      status: 'True'
+      lastUpdateTime: '2017-12-05T03:11:41Z'
+      lastTransitionTime: '2017-12-05T03:11:41Z'
+      message: Deployment config has minimum availability.
+    - type: Progressing
+      status: 'True'
+      lastUpdateTime: '2017-12-05T03:11:43Z'
+      lastTransitionTime: '2017-12-05T03:10:10Z'
+      reason: NewReplicationControllerAvailable
+      message: replication controller "navitas-main-35" successfully rolled out
+  readyReplicas: 1
