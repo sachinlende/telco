@@ -7,6 +7,7 @@ import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.apache.camel.model.rest.RestBindingMode;
+import org.apache.camel.model.rest.RestParamType;
 import org.apache.camel.spi.DataFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,13 +45,23 @@ public class OutageServiceRoute extends RouteBuilder {
                 .log(">>> ${body}");
 
 
-        rest("/outage")
+        rest("/outage/{entityId}")
                 .get()
                 .id("sayRoute")
                 .consumes("application/json")
                 .produces("application/json")
+                .param().name("entityId").type(RestParamType.path).endParam()
+
                 .route()
                     .log("log ${body}")
+
+
+                .process(new Processor() {
+                    @Override
+                    public void process(Exchange exchange) throws Exception {
+                        System.out.println("hello");
+                    }
+                })
                     .bean(responseProcessor, "transformResponse")
                     .marshal(jacksonDataFormat)
                     //.setBody(simple("{\"hello\":\"telecom\"}"))

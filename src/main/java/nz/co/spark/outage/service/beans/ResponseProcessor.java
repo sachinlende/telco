@@ -19,8 +19,9 @@ public class ResponseProcessor {
     @Autowired
     OracleRepository oracleRepository;
 
-    public void transformResponse(Exchange ex){
-        List<Object[]> storedProcedureResults = oracleRepository.invokeSP();
+    public void transformResponse(Exchange ex) throws Exception{
+        int idRequest = (Integer.parseInt((String) ex.getIn().getHeader("entityId")));
+        List<Object[]> storedProcedureResults = oracleRepository.invokeSP(idRequest);
 
         List<Person> personList = new ArrayList<>();
 

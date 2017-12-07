@@ -1,5 +1,6 @@
 package nz.co.spark.data.access;
 
+import org.omg.PortableInterceptor.INACTIVE;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -14,28 +15,19 @@ public class OracleRepositoryImpl implements OracleRepository{
     @PersistenceContext
     private EntityManager entityManager;
 
-    public List<Object[]> invokeSP() {
+    public List<Object[]> invokeSP(int id) {
 
         StoredProcedureQuery storedProcedure = entityManager.createStoredProcedureQuery("GETPERSONPCKG.GETPERSON");
-
         // Set the parameters of the stored procedure.
         storedProcedure.registerStoredProcedureParameter("p_ref"  , Class.class, ParameterMode.REF_CURSOR);
+        storedProcedure.registerStoredProcedureParameter("p_id", Integer.class , ParameterMode.IN);
+
+        storedProcedure.setParameter("p_id", id);
 
         // Call the stored procedure.
         List<Object[]> storedProcedureResults = storedProcedure.getResultList();
 
         return storedProcedureResults;
-
-        //Object[]  myrecord = storedProcedureResults.get(0);
-
-        //storedProcedureResults.isEmpty();
-
-        // Use Java 8's cool new functional programming paradigm to map the objects from the stored procedure results
-            /*return storedProcedureResults.stream().map(result -> new MyObject(
-                    (Integer) result[0],
-                    (String) result[1]
-            )).collect(Collectors.toList());*/
-
     }
 }
 

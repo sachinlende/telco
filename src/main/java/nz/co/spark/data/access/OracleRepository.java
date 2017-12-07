@@ -5,5 +5,5 @@ import java.util.List;
 public interface OracleRepository {
 
 
-    public List<Object[]> invokeSP();
+    public List<Object[]> invokeSP(int id);
 }
