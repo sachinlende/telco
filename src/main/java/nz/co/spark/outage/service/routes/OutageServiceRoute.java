@@ -12,10 +12,14 @@ import org.apache.camel.spi.DataFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static org.apache.camel.LoggingLevel.INFO;
+
 
 @Component
 public class OutageServiceRoute extends RouteBuilder {
 
+
+    private static final String CLASSNAME = OutageServiceRoute.class.getName();
 
     @Autowired
     ResponseProcessor responseProcessor;
@@ -26,34 +30,29 @@ public class OutageServiceRoute extends RouteBuilder {
 
     public void configure() throws Exception {
 
-
-
         restConfiguration().component("jetty")
                 .scheme("{{common.http_protocol}}")
                 .bindingMode(RestBindingMode.off)
                 .host("{{common.http_host}}")
                 .port("{{common.http_port}}")
-                .contextPath("/")
-        ;
-
+                .contextPath("/");
 
         from("timer://foo?period=15000")
                 .id("timer-routes")
                 .log(">>> ${body}");
 
 
-
         rest("/outage/{entityId}")
                 .get()
-                .id("sayRoute")
+                .id("outage-service-route")
                 .consumes("application/json")
                 .produces("application/json")
                 .param().name("entityId").type(RestParamType.path).endParam()
                 .route()
-                    .log("log ${body}")
+                    .log(INFO, CLASSNAME, "message header: ${headers} and body: ${body} ")
                     .bean(responseProcessor, "transformResponse")
+                    .log(INFO, CLASSNAME, "message header: ${headers} and body: ${body} ")
                     .marshal(jacksonDataFormat)
                 .endRest();
-        ;
     }
 }
