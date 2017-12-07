@@ -23,23 +23,16 @@ public class ResponseProcessor {
         int idRequest = (Integer.parseInt((String) ex.getIn().getHeader("entityId")));
         List<Object[]> storedProcedureResults = oracleRepository.invokeSP(idRequest);
 
-        List<Person> personList = new ArrayList<>();
-
-        //for(Object[] currentRecord : storedProcedureResults){
         Object[] record = storedProcedureResults.get(0);
-            Person person = new Person();
-            BigDecimal id = (BigDecimal) record[0];
-            String idString = id.toString();
-            String firstName = (String) record[1];
-            String lastName = (String) record[2];
+        Person person = new Person();
+        BigDecimal id = (BigDecimal) record[0];
+        String idString = id.toString();
+        String firstName = (String) record[1];
+        String lastName = (String) record[2];
 
-            //System.out.println(name);
-            person.setId(idString);
-            person.setFirstname(firstName);
-            person.setLastname(lastName);
-
-        //}
-
+        person.setId(idString);
+        person.setFirstname(firstName);
+        person.setLastname(lastName);
 
         ex.getIn().setBody(person);
 

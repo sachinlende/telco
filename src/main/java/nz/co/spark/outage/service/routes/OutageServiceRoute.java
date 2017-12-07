@@ -29,20 +29,18 @@ public class OutageServiceRoute extends RouteBuilder {
 
 
         restConfiguration().component("jetty")
-                .scheme("http")
+                .scheme("{{common.http_protocol}}")
                 .bindingMode(RestBindingMode.off)
-                .host("localhost")
-                .port("9082")
+                .host("{{common.http_host}}")
+                .port("{{common.http_port}}")
                 .contextPath("/")
         ;
 
 
         from("timer://foo?period=15000")
-
                 .id("timer-routes")
-                .log(">>> ${body}")
-
                 .log(">>> ${body}");
+
 
 
         rest("/outage/{entityId}")
@@ -51,22 +49,10 @@ public class OutageServiceRoute extends RouteBuilder {
                 .consumes("application/json")
                 .produces("application/json")
                 .param().name("entityId").type(RestParamType.path).endParam()
-
                 .route()
                     .log("log ${body}")
-
-
-                .process(new Processor() {
-                    @Override
-                    public void process(Exchange exchange) throws Exception {
-                        System.out.println("hello");
-                    }
-                })
                     .bean(responseProcessor, "transformResponse")
                     .marshal(jacksonDataFormat)
-                    //.setBody(simple("{\"hello\":\"telecom\"}"))
-                    //.transform(method("myBean", "saySomething"))
-                // .to(DIRECT_MAIN_ROUTE)
                 .endRest();
         ;
     }
