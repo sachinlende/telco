@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  creationTimestamp: '2017-12-06T18:14:10Z'
+  labels:
+    app: s2i-spring-boot-camel
+    component: s2i-spring-boot-camel
+    group: quickstarts
+    project: s2i-spring-boot-camel
+    provider: s2i
+    template: s2i-spring-boot-camel
+    version: 1.0.0.redhat-000055
+  name: s2i-spring-boot-camel
+  namespace: spring-boot
+  resourceVersion: '29073'
+  selfLink: /oapi/v1/namespaces/spring-boot/buildconfigs/s2i-spring-boot-camel
+  uid: 41c33df6-dab1-11e7-9f04-06823fdd3feb
+spec:
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 's2i-spring-boot-camel:latest'
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    git:
+      ref: outage-service
+      uri: 'https://github.com/zolinz/telco.git'
+    type: Git
+  strategy:
+    sourceStrategy:
+      env:
+        - name: BUILD_LOGLEVEL
+          value: '5'
+        - name: ARTIFACT_DIR
+        - name: MAVEN_ARGS
+          value: package -DskipTests -Dfabric8.skip -e -B
+        - name: MAVEN_ARGS_APPEND
+      forcePull: true
+      from:
+        kind: ImageStreamTag
+        name: 'fis-java-openshift:latest'
+        namespace: spring-boot
+      incremental: true
+    type: Source
+  triggers: []
+status:
+  lastVersion: 23
